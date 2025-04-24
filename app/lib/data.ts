@@ -8,6 +8,7 @@ import {
   Revenue,
 } from './definitions';
 import { formatCurrency } from './utils';
+import { unstable_noStore as noStore } from 'next/cache';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
@@ -86,12 +87,8 @@ export async function fetchCardData() {
 }
 
 const ITEMS_PER_PAGE = 6;
-export async function fetchFilteredInvoices(
-  query: string,
-  currentPage: number,
-) {
-  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
-
+export async function fetchFilteredInvoices(query: string) {
+  noStore();
   try {
     const invoices = await sql<InvoicesTable[]>`
       SELECT
@@ -100,8 +97,7 @@ export async function fetchFilteredInvoices(
         invoices.date,
         invoices.status,
         customers.name,
-        customers.email,
-        customers.image_url
+        customers.email
       FROM invoices
       JOIN customers ON invoices.customer_id = customers.id
       WHERE
@@ -111,7 +107,6 @@ export async function fetchFilteredInvoices(
         invoices.date::text ILIKE ${`%${query}%`} OR
         invoices.status ILIKE ${`%${query}%`}
       ORDER BY invoices.date DESC
-      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
     `;
 
     return invoices;

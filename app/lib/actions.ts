@@ -118,8 +118,13 @@ export async function deleteInvoice(id: string) {
     prevState: string | undefined,
     formData: FormData,
   ) {
+    const redirectTo = formData.get('redirectTo') as string;
+  
     try {
-      await signIn('credentials', formData);
+      await signIn('credentials', {
+        redirect: true,
+        callbackUrl: redirectTo || '/dashboard', // 👈 handle missing redirect safely
+      });
     } catch (error) {
       if (error instanceof AuthError) {
         return 'Invalid credentials.';
@@ -127,3 +132,4 @@ export async function deleteInvoice(id: string) {
       throw error;
     }
   }
+  

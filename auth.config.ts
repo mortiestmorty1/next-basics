@@ -1,10 +1,9 @@
-// auth.config.ts
 import type { NextAuthConfig } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import { z } from 'zod';
-import type { User } from '@/app/lib/definitions';
 import bcrypt from 'bcryptjs';
 import postgres from 'postgres';
+import type { User } from '@/app/lib/definitions';
 
 const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require' });
 
@@ -14,6 +13,7 @@ async function getUser(email: string): Promise<User | undefined> {
 }
 
 export const authConfig = {
+  secret: process.env.AUTH_SECRET, // ✅ add this line
   pages: {
     signIn: '/login',
   },
@@ -41,7 +41,6 @@ export const authConfig = {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
-
       if (isOnDashboard && !isLoggedIn) return false;
       if (!isOnDashboard && isLoggedIn) {
         return Response.redirect(new URL('/dashboard', nextUrl));

@@ -10,7 +10,7 @@ import {
 import { formatCurrency } from './utils';
 import { unstable_noStore as noStore } from 'next/cache';
 
-const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
+const sql = postgres(process.env.DATABASE_URL!, { ssl: 'require' });
 
 export async function fetchRevenue() {
   try {
